@@ -1,0 +1,22 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    networks:
+      - proxy
+
+  web:
+    build: .
+    expose:
+      - "5000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: proxy
