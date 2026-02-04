@@ -1,0 +1,25 @@
+FROM lscr.io/linuxserver/kali-linux:latest
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG LOGISIM_VERSION=4.0.0
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl ca-certificates openjdk-21-jre \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /opt/logisim \
+ && curl -L -o /opt/logisim/logisim-evolution.jar \
+    "https://github.com/logisim-evolution/logisim-evolution/releases/download/v${LOGISIM_VERSION}/logisim-evolution-${LOGISIM_VERSION}-all.jar"
+
+# Atajo de escritorio (sin heredoc)
+RUN mkdir -p /usr/share/applications && \
+    printf '%s\n' \
+      '[Desktop Entry]' \
+      'Type=Application' \
+      'Name=Logisim Evolution' \
+      'Exec=java -jar /opt/logisim/logisim-evolution.jar' \
+      'Icon=applications-education' \
+      'Terminal=false' \
+      'Categories=Education;Electronics;' \
+    > /usr/share/applications/logisim-evolution.desktop
+
