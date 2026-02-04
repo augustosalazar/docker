@@ -1,0 +1,39 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.dashboard.address=:8080"
+      - "--api.dashboard=true"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`localhost`)"
+      - "traefik.http.routers.traefik.entrypoints=dashboard"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+  web:
+    build: .
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.tlb-web.entrypoints=web"
+      - "traefik.http.routers.tlb-web.rule=Host(`localhost`)"
+      - "traefik.http.routers.tlb-web.service=tlb-web-svc"
+      - "traefik.http.services.tlb-web-svc.loadbalancer.server.port=5000"
+
+networks:
+  proxy:
+    name: proxy
